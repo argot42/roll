@@ -3,12 +3,17 @@
 #include <string.h>
 #include <regex.h>
 #include <time.h>
+#include <errno.h>
+
+#define MAXLEN 1000
 
 char* replace(char* line);
 int find(char* str, regex_t* regex, int* match_start, int* match_end);
 char* roll(char* dice);
 char* concat(char* dest, char* src, size_t src_sz);
 int count_digits(int n);
+void memchk(void* ptr);
+int getln(char* buf, int lim);
 
 int 
 main(int argc, char *argv[])
@@ -16,6 +21,7 @@ main(int argc, char *argv[])
     int i, n;
     char* s = NULL;
     time_t t;
+    char line[MAXLEN];
 
     srand((unsigned) time(&t));
 
@@ -26,7 +32,11 @@ main(int argc, char *argv[])
             free(s);
         }
     } else {
-        printf("stdin\n");
+        while ((getln(line, MAXLEN)) > 0) {
+            s = replace(line);
+            printf("%s\n", s);
+            free(s);
+        }
     }
 
     return 0;
@@ -59,6 +69,7 @@ replace(char* line)
         }
 
         dice = realloc(dice, sizeof(char) * match_size);
+        memchk(dice);
         strncpy(dice, line + match_start, match_size);
         dice[match_size] = 0;
 
@@ -113,10 +124,12 @@ concat(char* dest, char* src, size_t src_sz)
     }
 
     dest = realloc(dest, sizeof(char) * (dest_sz + src_sz));
+    memchk(dest);
 
     for (i = dest_sz, j = 0; j < src_sz; i++, j++) {
         dest[i] = src[j];
     }
+    dest[i] = 0;
 
     return dest;
 }
@@ -144,11 +157,12 @@ roll(char* dice)
     }
 
     for (i = 0; i < amount; i++) {
-        n += (rand() % (type -1)) + 1;
+        n += (rand() % type) + 1;
     }
 
     digits = count_digits(n);
     result = malloc(sizeof(char) * digits);
+    memchk(result);
 
     sprintf(result, "%d", n);
 
@@ -166,4 +180,31 @@ count_digits(int n)
     }
 
     return count;
+}
+
+void 
+memchk(void* ptr)
+{
+    if (ptr != NULL)
+        return;
+
+    perror("out of memory!");
+    exit(EXIT_FAILURE);
+}
+
+int 
+getln(char* buf, int lim) 
+{
+    int i = 0, c;
+
+    while ((c = getchar()) != EOF && c != '\n') {
+        if (i >= lim-1)
+            continue;
+        buf[i] = c;
+        i++;
+    }
+
+    buf[i] = 0;
+
+    return i;
 }
