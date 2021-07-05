@@ -63,6 +63,10 @@ replace(char* line)
         dice[match_size] = 0;
 
         result = roll(dice);
+        if (result == NULL) {
+            s[0] = 0;
+            break;
+        }
 
         s = concat(s, line, match_start);
         s = concat(s, result, strlen(result));
