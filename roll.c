@@ -4,6 +4,7 @@
 #include <regex.h>
 #include <time.h>
 #include <errno.h>
+#include <unistd.h>
 
 #define MAXLEN 1000
 
@@ -14,11 +15,12 @@ char* concat(char* dest, char* src, size_t src_sz);
 int count_digits(int n);
 void memchk(void* ptr);
 int getln(char* buf, int lim);
+void putln(char* buf, int lim);
 
 int 
 main(int argc, char *argv[])
 {
-    int i, n;
+    int i;
     char* s = NULL;
     time_t t;
     char line[MAXLEN];
@@ -28,13 +30,13 @@ main(int argc, char *argv[])
     if (argc > 1) {
         for (i = 1; i < argc; i++) {
             s = replace(argv[i]);
-            printf("%s\n", s);
+            putln(s, strlen(s));
             free(s);
         }
     } else {
         while ((getln(line, MAXLEN)) > 0) {
             s = replace(line);
-            printf("%s\n", s);
+            putln(s, strlen(s));
             free(s);
         }
     }
@@ -207,4 +209,11 @@ getln(char* buf, int lim)
     buf[i] = 0;
 
     return i;
+}
+
+void 
+putln(char* buf, int lim)
+{
+    write(stdout, buf, sizeof(char) * lim);
+    write(stdout, "\n", sizeof(char));
 }
