@@ -2,21 +2,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <regex.h>
-
-/*char* searchReplace(char* line);
-int roll(char* dice);
-char* replace(char* dest, char* src, int start, int end, int rpl);*/
+#include <time.h>
 
 char* replace(char* line);
 int find(char* str, regex_t* regex, int* match_start, int* match_end);
 char* roll(char* dice);
 char* concat(char* dest, char* src, size_t src_sz);
+int count_digits(int n);
 
 int 
 main(int argc, char *argv[])
 {
     int i, n;
     char* s = NULL;
+    time_t t;
+
+    srand((unsigned) time(&t));
 
     if (argc > 1) {
         for (i = 1; i < argc; i++) {
@@ -122,16 +123,43 @@ roll(char* dice)
     char *result = NULL;
     char delim[] = "d";
     char *left, *right;
+    int amount, type;
+    int i, n = 0, digits;
 
     left = strtok(dice, delim);
     right = strtok(NULL, delim);
 
-    printf("%s - %s\n", left, right);
+    amount = atoi(left);
+    if (amount < 1) {
+        return NULL; 
+    }
 
-    result = malloc(sizeof(char) * 2);
+    type = atoi(right);
+    if (type < 1) {
+        return NULL;
+    }
 
-    result[0] = '0';
-    result[1] = 0;
+    for (i = 0; i < amount; i++) {
+        n += (rand() % (type -1)) + 1;
+    }
+
+    digits = count_digits(n);
+    result = malloc(sizeof(char) * digits);
+
+    sprintf(result, "%d", n);
 
     return result;
+}
+
+int
+count_digits(int n)
+{
+    int count = 0;
+
+    while (n != 0) {
+        n /= 10;
+        count++;
+    }
+
+    return count;
 }
